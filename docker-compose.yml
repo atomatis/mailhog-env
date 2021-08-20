@@ -1,0 +1,29 @@
+version: '3.7'
+
+services:
+  mail-tester:
+    image: mailhog/mailhog
+    container_name: mailhog-mail-tester
+    restart: unless-stopped
+    user: root
+    networks:
+    - smtp
+    - proxy
+    ports:
+    - 8025
+    - "0.0.0.0:1025:25"
+    environment:
+    - MH_SMTP_BIND_ADDR=0.0.0.0:25
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.mailhog.rule=Host(`mailhog.${PROXY_DOMAIN}`)
+    - traefik.http.routers.mailhog.entryPoints=insecure
+    - traefik.http.services.mailhog.loadbalancer.server.port=8025
+
+networks:
+  smtp:
+    external:
+      name: smtp
+  proxy:
+    external:
+      name: proxy
